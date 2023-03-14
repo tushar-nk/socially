@@ -31,6 +31,7 @@ function SignUpF() {
         lastName: values.fullname.split(" ")[1],
       };
       mutate(data);
+      console.log(data);
     } catch (error) {}
   };
   return (
