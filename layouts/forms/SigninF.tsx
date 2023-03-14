@@ -13,31 +13,49 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Formik } from "formik";
-import React from "react";
+import { Form, Formik } from "formik";
+import React, { useCallback, useContext } from "react";
 import Button from "@mui/material/Button";
 import BaseCard from "../../components/Cards/BaseCard";
-import { SignInEnum } from "../../utils/enums";
+import { SignInEnum } from "../../utils/types";
 import { Box } from "@mui/system";
 import LinkC from "../../components/Links/LinkC";
 import SVGIcon from "../../components/Buttons/Icon";
 import { useMutation } from "react-query";
 import { Auth } from "../../utils/services/apiRequest";
-const initialValues: SignInEnum = {
-  username: "",
-  password: "",
-};
+import { SignInConst } from "../../utils/constant";
+import { CommonContext } from "../CommonLayout";
+import { useRouter } from "next/router";
+
 function SigninF() {
-  const mutation = useMutation((auth: SignInEnum) => Auth.SignIn(auth));
-  const submit = async (values: SignInEnum) => {
-    try {
-      mutation.mutate(values);
-    } catch (error) {}
-  };
+  const { setIsLoading, setNotification } = useContext(CommonContext);
+  const router = useRouter();
+  const { mutate, isLoading } = useMutation((auth: SignInEnum) =>
+    Auth.SignIn(auth)
+  );
+  const callBack = useCallback(() => {
+    setIsLoading(isLoading);
+  }, [isLoading]);
+
   return (
-    <Formik initialValues={initialValues} onSubmit={submit}>
-      {({ values, errors }) => (
-        <>
+    <Formik
+      initialValues={SignInConst}
+      onSubmit={(values) =>
+        mutate(values, {
+          onError: (error: any) => {
+            setNotification({
+              message: error?.message,
+              type: "error",
+            });
+          },
+          onSuccess: (success) => {
+            router.push("/");
+          },
+        })
+      }
+    >
+      {({ values, handleChange, handleBlur, handleSubmit }) => (
+        <Form onSubmit={handleSubmit}>
           <BaseCard title="">
             <Stack spacing={3}>
               <Box display="flex" justifyContent="center">
@@ -53,10 +71,20 @@ function SigninF() {
                   Or sign in with credentials
                 </Typography>
               </Divider>
-              <TextField id="email-basic" label="Email" variant="outlined" />
+              <TextField
+                id="username"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value={values.username}
+                label="Email or Username"
+                variant="outlined"
+              />
               <FormGroup>
                 <TextField
-                  id="pass-basic"
+                  id="password"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.password}
                   label="Password"
                   type="password"
                   variant="outlined"
@@ -75,6 +103,7 @@ function SigninF() {
             <Button
               variant="contained"
               color="primary"
+              type="submit"
               sx={{ mt: 2, width: "100%" }}
             >
               Let's go
@@ -90,8 +119,8 @@ function SigninF() {
                 labelProps={{ color: "primary.dark", variant: "subtitle2" }}
               />
             </Box>
-          </BaseCard>{" "}
-        </>
+          </BaseCard>
+        </Form>
       )}
     </Formik>
   );

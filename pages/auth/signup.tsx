@@ -8,7 +8,7 @@ import PublicLayout from "../../layouts/PublicLayout";
 function SignUpP() {
   return (
     <PublicLayout>
-      <Grid item xs={10} md={6} lg={4} px={8}>
+      <Grid item xs={12} sm={10} md={6} xl={4} lg={4} margin="auto">
         <Box p={2}>
           <LogoC />
         </Box>

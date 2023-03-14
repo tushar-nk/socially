@@ -11,33 +11,30 @@ import {
 import { Form, Formik } from "formik";
 import Button from "@mui/material/Button";
 import BaseCard from "../../components/Cards/BaseCard";
-import { SignUpAPIEnum, SignUpEnum } from "../../utils/enums";
+import { SignUpAPIEnum, SignUpEnum } from "../../utils/types";
 import { Box } from "@mui/system";
 import LinkC from "../../components/Links/LinkC";
 import SVGIcon from "../../components/Buttons/Icon";
 import { useMutation } from "react-query";
 import { Auth } from "../../utils/services/apiRequest";
-const initialValues: any = {
-  username: "",
-  password: "",
-  fullname: "",
-  email: "",
-};
+import { SignUpConst } from "../../utils/constant";
+
 function SignUpF() {
-  const mutation = useMutation((user: SignUpAPIEnum) => Auth.SignUp(user));
+  const { mutate, isLoading } = useMutation((user: SignUpAPIEnum) =>
+    Auth.SignUp(user)
+  );
   const submit = async (values: SignUpEnum) => {
     try {
       const data: SignUpAPIEnum = {
         ...values,
-        firstname: values.fullname.split(" ")[0],
-        lastname: values.fullname.split(" ")[1],
+        firstName: values.fullname.split(" ")[0],
+        lastName: values.fullname.split(" ")[1],
       };
-      mutation.mutate(data);
+      mutate(data);
     } catch (error) {}
   };
-  console.log(process.env.NEXT_PUBLIC_BASE_URL);
   return (
-    <Formik initialValues={initialValues} onSubmit={submit}>
+    <Formik initialValues={SignUpConst} onSubmit={submit}>
       {({ values, errors, handleChange, handleBlur, handleSubmit }) => (
         <Form onSubmit={handleSubmit}>
           <BaseCard title="">
@@ -101,7 +98,9 @@ function SignUpF() {
                   variant="outlined"
                 />
                 <FormControlLabel
-                  control={<Checkbox defaultChecked />}
+                  control={<Checkbox checked={values.terms} />}
+                  name="terms"
+                  onChange={handleChange}
                   label={
                     <Typography color="grey.dark" variant="body2">
                       Terms and Conditions
@@ -115,9 +114,10 @@ function SignUpF() {
               variant="contained"
               color="primary"
               type="submit"
+              disabled={isLoading}
               sx={{ mt: 2, width: "100%" }}
             >
-              Let's start
+              {isLoading ? "...Creating account" : "Let's start"}
             </Button>
             <Divider sx={{ my: 4 }}></Divider>
             <Box display="flex" gap={0.5}>
